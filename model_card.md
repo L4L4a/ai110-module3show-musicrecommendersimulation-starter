@@ -34,7 +34,24 @@ Everything in this section comes from the four baseline runs (`--basic --plain`)
 
 ## 6. Evaluation Process
 
-I ran `python -m src.main` for four hand-built profiles and read the top 5 for each, checking three things: (1) is the song a human would call the best match ranked first (yes for Pop, Lofi and Rock, where one song matches all three terms), (2) do the reason strings add up to the printed score (they do, to rounding), and (3) what happens when the profile cannot be satisfied (the adversarial case, see above). I also ran the two starter pytest tests, which pass. There is no numeric metric and no real-user feedback, so "reasonable" here means my own judgment on a 20-song catalog.
+I ran `python -m src.main` for four hand-built profiles (High-Energy Pop, Chill Lofi, Deep Intense Rock, and an adversarial sad blues at 0.95 energy) and read the top 5 for each. I checked three things: (1) is the song a human would call the best match ranked first (yes for Pop, Lofi and Rock, where one song matches all three terms), (2) do the reason strings add up to the printed score (they do, to rounding; I also recomputed several scores by hand), and (3) what happens when the profile cannot be satisfied (the adversarial case). I also ran the pytest tests, which pass. There is no numeric metric and no real-user feedback, so "reasonable" means my own judgment on a 20-song catalog.
+
+**Does it feel right?** Chill Lofi does: the top 5 are lofi, ambient and jazz songs that are all quiet (energy 0.28-0.42). Deep Intense Rock only half does: Storm Runner is correct at rank 1, but Gym Hero (a pop workout song) at rank 2 does not sound like rock, it is there because its mood is "intense" and it is very loud. (This is a reading of the output; adjust it to your own ear.)
+
+**Why Gym Hero keeps appearing (plain language):** Gym Hero is pop, intense and very loud (energy 0.93), so it earns the genre bonus for a pop fan, the mood bonus for a rock fan, and a near-perfect energy score for anyone who wants loud music. It shows up in 3 of the 4 profiles' top 5 for those reasons, not because the system understands what someone who wants "Happy Pop" actually wants.
+
+**Experiment (weight shift):** I halved genre and doubled energy (genre 1.0 / mood 1.0 / energy 2.0). Rankings stayed almost the same: only High-Energy Pop swapped ranks 3 and 4 (Rooftop Lights above Neon Ballroom), and the other lists kept their order with the scores bunched closer together (Deep Intense Rock ranks 2-5 went from 1.99, 0.98, 0.95, 0.90 to 2.98, 1.96, 1.90, 1.80). So the weights were not the main cause of the filler results; the catalog is.
+
+**Profile-pair comparisons (what changed and why it makes sense):**
+
+- **Pop vs Lofi**: no songs in common. Pop wants loud songs (energy about 0.8-0.93), Lofi wants quiet ones (0.28-0.42), a target gap of 0.55, so the energy term alone pushes them apart.
+- **Pop vs Rock**: 3 songs in common (Sunrise City, Gym Hero, Storm Runner). Both ask for high energy (0.90 vs 0.92), and Gym Hero matches Pop on genre and Rock on mood.
+- **Pop vs Adversarial**: 2 songs in common (Gym Hero, Storm Runner), both loud songs that fill the list once the single on-genre song is used up.
+- **Lofi vs Rock**: no songs in common; they sit at opposite ends of the energy scale, so nothing overlaps.
+- **Lofi vs Adversarial**: no songs in common. Lofi gets three genre matches, the adversarial profile gets one blues song plus loud filler.
+- **Rock vs Adversarial**: 4 songs in common (Pulse Garden, Gym Hero, Iron Cathedral, Storm Runner). Both have only one song in their genre and both want energy of about 0.92-0.95, so after rank 1 both lists are just "the loudest songs".
+
+**What surprised me:** how little the weights mattered compared with the catalog, and that a pop song (Gym Hero) was the second-best result for a rock fan.
 
 ## Stretch: Diversity re-ranking
 

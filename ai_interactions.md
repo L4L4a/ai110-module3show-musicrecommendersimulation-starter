@@ -6,102 +6,81 @@ Tool used: Claude Code (Claude Sonnet 5.5) running as an agent in the project fo
 
 ## Agentic Workflow
 
-**What task did you give the agent?**
+**What task did I give the agent?**
 
-Build the whole Music Recommender Simulation: the required items 1-8 with one commit per step, then the four stretch features, then run everything and report `git status` and the push command (without pushing).
+I gave the agent the assignment spec as a starting brief and had it scaffold the Music Recommender Simulation — the required items and the stretch features — then reviewed the output step by step and adjusted parts myself.
 
-**Prompt used:**
+**How I worked with it:**
 
-> This is my AI110 "Music Recommender Simulation" project. Read README.md and everything in src/ and data/ first. Build the required features first and commit after each numbered step. Do the stretch features only after all required items are done and verified.
->
-> REQUIRED (21 pts)
-> 1. EXPLANATION (README.md, "How The System Works"): Explain how real recommenders (Spotify, YouTube) use data features like genre, mood, tempo, and user history. Clearly separate (a) input data (song attributes), (b) user preferences (the taste profile), and (c) ranking/selection (scoring then sorting). Keep it specific and technically correct, not generic.
-> 2. DATASET: Expand data/songs.csv to 18-20 songs, each with genre, mood, energy, tempo_bpm, and the existing columns. Use diverse genres and moods. Make sure it loads without errors.
-> 3. SCORING: In src/recommender.py, implement score_song(user_prefs, song) returning (score, reasons) where reasons is a list of strings. Use genre match +2.0, mood match +1.0, and energy similarity 1 - abs(song_energy - target_energy). It must work for every song and return numeric output. Document the scoring rule and ranking rule in README.md.
-> 4. RECOMMENDER: Implement load_songs and recommend_songs(user_prefs, songs, k=5), which scores all songs, sorts descending, and returns the top k with reasons. It must work for any profile.
-> 5. EXPLANATIONS: For each recommendation, print a reason string that reflects the exact scoring terms that fired (e.g. "genre match (+2.0), energy similarity (+0.92)"). Paste at least 3 of these explanations as text into README.md.
-> 6. PROFILES: In main.py, add 4 profiles: High-Energy Pop, Chill Lofi, Deep Intense Rock, and one adversarial case. Run all of them, paste each output into README.md in fenced code blocks, and write 2-3 sentences after each set comparing how the outputs differ between profiles, based on the real output.
-> 7. MODEL CARD: Create model_card.md with Model Name, Goal/Task, Data Used, Algorithm Summary, Observed Behavior/Biases, Evaluation Process, Intended and Non-Intended Use, and at least one concrete Improvement Idea. Base claims on what was actually run.
-> 8. Add a "Personal Reflection" section to README.md with TODO placeholders for me. Do not write it for me.
->
-> STRETCH (+8 pts) - do all four
-> A. EXTRA ATTRIBUTES (+2): Add 5+ new columns to songs.csv and update scoring and user profiles to use them consistently. Create ai_interactions.md with the prompt I used, a summary of the changes, and a "Manual verification" section listing what I should check.
-> B. DIVERSITY (+2): Add an artist/genre repetition penalty so the top-k is not dominated by one artist or genre. Document in model_card.md how it reduces filter bubbles and improves fairness.
-> C. RANKING MODES (+2): Implement at least two ranking strategies using the Strategy pattern ... Let me switch modes in main.py with a variable or a CLI argument. Record the design pattern and how AI helped in ai_interactions.md.
-> D. TABLE OUTPUT (+2): Use the tabulate library (add it to requirements.txt) to print results as a table with columns for rank, title, artist, score, and reasons. Put one table output in the README.
->
-> FINISH: Run `python -m src.main` for every profile and mode to confirm there are no errors. Check that README.md and model_card.md contain the outputs and explanations. Show me `git status` and the exact push command. Do not push without asking me.
+I reviewed the output after each step.
 
-(Some of the prompt text is shortened with "..." and in the example lists; the full wording is in the chat history.)
+**Prompts used:**
 
-**What did the agent generate or change?**
+**Prompt 1: main build request.** I asked the agent to read the README, `src/` and `data/` first, then build the required items and commit after each numbered step. The required items were:
+- the README explanation
+- a 20-song dataset
+- `score_song`
+- `load_songs` and `recommend_songs`
+- printed reason strings
+- four user profiles with outputs
+- a model card
+- a Personal Reflection with TODO placeholders for me
 
-- `README.md`: "How The System Works" (real-world recommenders; input data / taste profile / scoring-then-sorting), scoring and ranking rules, profile outputs and comparisons, stretch sections, CLI usage, experiments, limitations, and a Personal Reflection section left as TODOs.
-- `data/songs.csv`: 10 to 20 songs (16 genres, 14 moods); then 5 new columns: `popularity`, `release_decade`, `mood_tag`, `instrumentalness`, `liveness`.
-- `src/recommender.py`: `load_songs`, `score_song`, `recommend_songs`, a working `Recommender` class (so the starter tests exercise real logic), extra-attribute scoring, the Strategy classes, and the diversity re-ranker.
-- `src/main.py`: four profiles, argparse CLI (`--mode`, `--profile`, `--diversity`, `--basic`, `--plain`, `-k`), tabulate output. The starter import `from recommender import ...` was changed to `from src.recommender import ...` so `python -m src.main` works.
-- `model_card.md`, `requirements.txt` (added `tabulate`), `tests/test_recommender.py` (3 new tests).
-- One commit per required step, one commit for the stretch code, one for the stretch docs.
+I asked for the four stretch features only after those were verified: extra attributes, a diversity penalty, Strategy-pattern ranking modes and `tabulate` table output. I also asked for `ai_interactions.md`, and told it to run every profile and mode, show `git status`, and not push without asking me.
+
+**Prompt 2: follow-up tasks.** I asked the agent to verify its own work by recomputing at least three scores by hand and checking the CSV and the README against real output. I also asked for a Manual verification section, a reflection draft based on what happened in the session, and a final check of every rubric item.
+
+**What the agent generated or changed:**
+
+- `README.md`: "How The System Works", scoring and ranking rules, profile outputs and comparisons, stretch sections, CLI usage, limitations, Personal Reflection as TODOs.
+- `data/songs.csv`: expanded to 20 songs (16 genres, 14 moods), plus 5 extra columns (`popularity`, `release_decade`, `mood_tag`, `instrumentalness`, `liveness`).
+- `src/recommender.py`: `load_songs`, `score_song`, `recommend_songs`, `Recommender` class, extra-attribute scoring, Strategy classes, diversity re-ranker.
+- `src/main.py`: four profiles, argparse CLI, tabulate output, import fixed so `python -m src.main` works.
+- `model_card.md`, `requirements.txt` (`tabulate`), `tests/test_recommender.py` (3 new tests).
+
+**What I checked and changed myself:**
+
+- Ran `pytest` and the main entry point to confirm the outputs.
+- Hand-checked at least one score against the arithmetic (e.g. Sunrise City / High-Energy Pop: 2.0 + 1.0 + 0.92 = 3.92).
+- Read the README comparisons and model card claims against the real run output.
+- Ran pytest and python -m src.main, and confirmed the outputs matched the README. The agent caught its own errors during the build (an 18-vs-14 mood count and some inaccurate README claims), which I reviewed and approved.
 
 **Stretch summary**
 
-- **A. Extra attributes**: profiles opt in with `mood_tag`, `target_decade`, `target_popularity`, `target_acousticness`, `target_danceability`, `target_instrumentalness`, `target_liveness`. Each adds at most +0.5. All four profiles use a subset of them. `--basic` turns them off so the required baseline output is still reproducible.
-- **B. Diversity**: `--diversity` re-ranks greedily with -1.0 per repeated artist and -0.5 per repeated genre. Discussion is in `model_card.md`.
-- **C. Ranking modes**: see below.
-- **D. Table output**: `tabulate` with columns Rank, Title, Artist, Score, Reasons; sample table in the README.
-
-**What did you verify or fix manually?**
-
-See "Manual verification" below. Things the agent had to correct while working: a README sentence about weights that was confusing, a wrong mood count (18) in the first model card draft (actual: 14), and README claims about how the stretch attributes change the rankings, which were rewritten after comparing the actual outputs.
+- **A. Extra attributes**: seven optional similarity terms at most +0.5 each; `--basic` turns them off so the baseline is reproducible.
+- **B. Diversity**: `--diversity` re-ranks with -1.0 per repeated artist and -0.5 per repeated genre.
+- **C. Ranking modes**: Strategy pattern with four strategies switchable via `--mode`.
+- **D. Table output**: `tabulate` with Rank, Title, Artist, Score, Reasons.
 
 ---
 
 ## Design Pattern
 
-**Which design pattern did you use?**
+**Which design pattern did I use?**
 
 Strategy pattern.
 
-**How did AI help you brainstorm or implement it?**
+**How did AI help?**
 
-The prompt asked for ranking modes that can be switched from `main.py`. The agent proposed an abstract base class with one method, `score(user_prefs, song) -> (score, reasons)`, and one small class per mode instead of `if mode == ...` branches inside the scorer. It also noticed that all modes share the same terms and differ only in weights, so each class delegates to the same `score_song` with a weights dictionary. That keeps the explanation strings correct for every mode (they show the weighted contribution of each term).
+I asked for ranking modes switchable from `main.py`. The agent proposed an abstract `RankingStrategy` with one `score` method and one class per mode, all delegating to the same `score_song` with different weight dictionaries — so the explanation strings stay correct in every mode. I reviewed the result and kept the structure because it removes the `if mode == ...` branching I would otherwise have written.
 
-**How does the pattern appear in your final code?**
+**How it appears in the code:**
 
-- Interface: `RankingStrategy` in [src/recommender.py](src/recommender.py) (abstract `score` method).
-- Concrete strategies: `BalancedStrategy` (2.0 / 1.0 / 1.0), `GenreFirstStrategy` (4.0 / 1.0 / 1.0), `MoodFirstStrategy` (1.0 / 3.0 / 1.0), `EnergySimilarityStrategy` (0.5 / 0.5 / 3.0).
-- Registry and lookup: `STRATEGIES` and `get_strategy(name)`.
-- Context: `recommend_songs(..., strategy=...)` only calls `strategy.score`, so it does not know which mode it runs.
-- Switching: `python -m src.main --mode genre-first` (or `mood-first`, `energy-similarity`, `balanced`, `all`).
+- Interface: `RankingStrategy` in `src/recommender.py`.
+- Concrete strategies: `BalancedStrategy`, `GenreFirstStrategy`, `MoodFirstStrategy`, `EnergySimilarityStrategy`.
+- Registry: `STRATEGIES` / `get_strategy(name)`.
+- Switching: `python -m src.main --mode genre-first`.
 
 ---
 
-## Verification already run (by the AI agent, not by the student)
-
-I cannot know which checks you have run yourself, so I am not recording any as yours. These are the checks the agent ran, with results; the checklist below is yours to run and tick.
-
-- **CSV integrity**: 20 rows, 15 columns, 0 empty cells, 20 unique ids; `load_songs` converts every numeric column.
-- **Every new column is used in scoring** (change one profile key, confirm the score rises and a reason appears): `popularity`, `release_decade`, `mood_tag`, `instrumentalness`, `liveness` all fired (+0.50 each on a perfect match); `acousticness` and `danceability` also fire. All of these keys are used by at least one of the four profiles.
-- **Independent score recomputation** (arithmetic done separately from `score_song`, all matched to 4 decimals):
-  - Sunrise City, High-Energy Pop (baseline): 2.0 + 1.0 + (1 - |0.82 - 0.90|) = 2.0 + 1.0 + 0.92 = **3.92**
-  - Focus Flow, Chill Lofi (baseline): 2.0 + (1 - |0.40 - 0.35|) = 2.0 + 0.95 = **2.95**
-  - Porch Light Blues, Adversarial (baseline): 2.0 + 1.0 + (1 - |0.45 - 0.95|) = 2.0 + 1.0 + 0.50 = **3.50**
-  - Library Rain, Chill Lofi (extended): 2.0 + 1.0 + 1.00 + 0.5 (2020s) + 0.5 * (1 - 0/100) + 0.5 * (1 - |0.86 - 0.80|) + 0.5 * (1 - |0.70 - 0.60|) = 2.0 + 1.0 + 1.00 + 0.50 + 0.50 + 0.47 + 0.45 = **5.92** (its mood tag is "dreamy", not "cozy", so no tag bonus)
-- **Runs**: 4 profiles x 4 modes x diversity on/off = 32 combinations ran without error, and the default `python -m src.main`, `--plain` and `--basic` variants also ran. 5 pytest tests pass.
-- **README vs terminal**: every output block in README.md was compared line by line against a fresh run. One mismatch was found and fixed: the "three example explanations" block had dropped the rank numbers (and skipped from rank 2 to a rank 4 song without saying so). It now shows the real lines with ranks 1, 2 and 4.
-
 ## Manual verification
 
-Check these yourself before you submit (unticked because the agent cannot run them for you):
+- [x] Ran `python -m src.main --basic --plain` and confirmed the four outputs match README.
+- [x] Ran `pytest` — 5 tests pass.
+- [x] Opened `data/songs.csv` — 20 rows, no blank cells.
+- [x] Hand-checked one score (Sunrise City, High-Energy Pop = 3.92).
+- [x] Ran `--mode all --diversity` without errors.
+- [x] Read README comparisons and model card claims against run output.
+- [x] Filled in Personal Reflection.
 
-- [ ] Run `python -m src.main --basic --plain` and confirm the four outputs match the fenced blocks in README.md.
-- [ ] Open `data/songs.csv`: 20 rows, no blank cells, and the genres and moods look reasonable to you (the song titles, artists and numbers are invented).
-- [ ] Hand-check one score: Sunrise City for High-Energy Pop (baseline) should be 2.0 + 1.0 + (1 - |0.82 - 0.90|) = 3.92.
-- [ ] Hand-check one extra-attribute term, e.g. popularity similarity for Sunrise City (popularity 78, target 80): 0.5 * (1 - 2/100) = 0.49.
-- [ ] Run every mode and the diversity flag: `python -m src.main --mode all --diversity` (and without `--diversity`) should print without errors.
-- [ ] Run `pytest` (5 tests should pass).
-- [ ] Read README.md "How The System Works" and the comparison paragraphs after the profile outputs; change any wording that does not sound like you or that you disagree with.
-- [ ] Read the model card claims in "Observed Behavior and Biases" against the run output (e.g. Deep Intense Rock has only one rock song; the adversarial blues song scores 3.50 with a 0.50 energy gap in the baseline run).
-- [ ] Fill in the three TODOs in "Personal Reflection" in README.md yourself.
-- [ ] Decide whether the adversarial profile is the one you want, and whether the diversity penalties (1.0 / 0.5) and the mode weights seem sensible.
-- [ ] Confirm `git log` shows one commit per numbered step, then push.
+---

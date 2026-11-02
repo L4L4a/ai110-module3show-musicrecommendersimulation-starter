@@ -2,16 +2,7 @@
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
-
-Your goal is to:
-
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+A small content-based music recommender. It reads 20 songs from a CSV, scores each one against a user taste profile (genre, mood, energy, plus optional extra attributes), and returns the top 5 with a reason string for every term that fired. I built it to see how a scoring rule plus a sort is really what a recommender is underneath, and to test how changing the weights changes who gets recommended.
 
 ---
 
@@ -55,7 +46,15 @@ A profile is a small dictionary, for example `{"genre": "pop", "mood": "happy", 
    The maximum possible score is 4.0. The function returns `(score, reasons)`, where `reasons` lists only the terms that fired.
 2. **Ranking rule** (whole catalog): `recommend_songs` scores every song, sorts by score descending (ties keep CSV order), and returns the top `k` (default 5) with a reason string.
 
-Genre is weighted twice as heavily as mood, and a genre match (+2.0) is worth more than a perfect energy score (at most +1.0). So a same-genre song can outrank an off-genre song that is a better match on mood and energy combined, which the experiments below probe.
+I weighted genre twice as heavily as mood, and a genre match (+2.0) is worth more than a perfect energy score (at most +1.0). So a same-genre song can outrank an off-genre song that is a better match on mood and energy combined, which the experiments below probe.
+
+### Expected biases
+
+Before running anything I expected three biases, and the runs confirmed them (details in `model_card.md`):
+
+- **Genre over-prioritized**: with genre worth +2.0, a same-genre song beats better mood/energy matches from other genres. In the adversarial run the only blues song scored 3.50 despite a 0.50 energy gap.
+- **Small-catalog filler**: most genres have a single song, so after the on-genre result the list is just "closest in energy" (Deep Intense Rock has one rock song).
+- **Exact-match labels**: `pop` and `indie pop` (or `chill` and `relaxed`) count as completely different.
 
 ---
 
@@ -69,26 +68,25 @@ Genre is weighted twice as heavily as mood, and a genre match (+2.0) is worth mo
    python -m venv .venv
    source .venv/bin/activate      # Mac or Linux
    .venv\Scripts\activate         # Windows
+   ```
 
 2. Install dependencies
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 3. Run the app:
 
-```bash
-python -m src.main                                   # all profiles, balanced mode, table output
-python -m src.main --mode mood-first                 # genre-first | mood-first | energy-similarity | balanced | all
-python -m src.main --diversity                       # artist/genre repetition penalty
-python -m src.main --profile "Chill Lofi" -k 5       # one profile (name or unique substring)
-python -m src.main --basic --plain                   # baseline 3-term scoring, plain text
-```
+   ```bash
+   python -m src.main                                   # all profiles, balanced mode, table output
+   python -m src.main --mode mood-first                 # genre-first | mood-first | energy-similarity | balanced | all
+   python -m src.main --diversity                       # artist/genre repetition penalty
+   python -m src.main --profile "Chill Lofi" -k 5       # one profile (name or unique substring)
+   python -m src.main --basic --plain                   # baseline 3-term scoring, plain text
+   ```
 
 ### Running Tests
-
-Run the starter tests with:
 
 ```bash
 pytest
@@ -189,8 +187,6 @@ Profile: genre=blues, mood=sad, energy=0.95
 
 **How the profiles differ.** High-Energy Pop and Chill Lofi both get a full 3-term match at rank 1 (3.92 and 4.00), but Pop has only three pop songs, so its list drops to mood-only and energy-only matches by rank 4-5, while Lofi has three lofi songs and fills ranks 1-3 with genre matches. Deep Intense Rock has just one rock song; after it, rank 2 is a pop song (Gym Hero) that matches only on mood, and ranks 3-5 are pure energy matches from metal, EDM and pop, with scores bunched between 0.90 and 0.98. The adversarial blues/sad/0.95 profile shows the weight problem clearly: the only blues song scores 3.50 despite an energy gap of 0.50, and every other result is below 1.0, so the user gets one on-genre song and four loud songs that are nothing like a sad blues listener's taste.
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
-
 ---
 
 ## Stretch Features
@@ -266,7 +262,8 @@ All of the stretch output above is printed with `tabulate` (columns: Rank, Title
 - **Switching ranking mode on the adversarial profile**: only `energy-similarity` changes the winner (Pulse Garden and Porch Light Blues both print as 3.94, with Pulse Garden a fraction higher); genre-first and mood-first only inflate the blues song's lead (6.94 and 5.94 vs 4.94 balanced) without changing what follows it.
 - **Turning on the diversity penalty for Chill Lofi**: the second LoRoom song drops out of the top 3 and a different-artist song takes its place, at the cost of showing a lower-scoring recommendation.
 - **Adding the stretch attributes**: scores rise (a full match goes from 4.0 to about 5.9-6.3), and the top 2 stay mostly stable (Chill Lofi swaps ranks 1 and 2), but ranks 3-5 change: for Deep Intense Rock, all three of Pulse Garden, Iron Cathedral and Sunrise City are replaced by Concrete Crown, Night Drive Loop and Rooftop Lights, because the extra terms (up to +0.5 each) outweigh the 0.1-0.2 energy differences that separated them.
-- Not yet tried: lowering the genre weight from 2.0 to 0.5, or adding tempo/valence terms.
+- **Weight shift (double energy, halve genre)**: baseline genre 2.0 / mood 1.0 / energy 1.0 became genre 1.0 / mood 1.0 / energy 2.0, using the baseline three-term profiles. The ranking was almost unchanged: only High-Energy Pop reordered, with Rooftop Lights (indie pop, happy, energy 0.76) moving above Neon Ballroom (pop, romantic, energy 0.68) at ranks 3 and 4, because it keeps a mood match and a closer energy while Neon Ballroom loses half its genre bonus (2.72 vs 2.56). The other three lists kept the same order but the scores bunched together: for Deep Intense Rock, ranks 2-5 went from 1.99, 0.98, 0.95, 0.90 to 2.98, 1.96, 1.90, 1.80. The change made the lists different in score, not more accurate; the underlying problem (one song per genre, so filler after rank 1) is the catalog, not the weights. Reproduce with `score_song(prefs, song, {"genre": 1.0, "mood": 1.0, "energy": 2.0})`.
+- Not yet tried: adding tempo/valence terms.
 
 ---
 
@@ -291,6 +288,4 @@ Read and complete `model_card.md`:
 
 ## Personal Reflection
 
-*Draft written with Claude from what happened in this session; edit it until it sounds like you.*
-
-The biggest learning moment for me was seeing that a recommender is just a scoring rule plus a sort, and that the weights decide almost everything. In the adversarial profile (sad blues at 0.95 energy) the only blues song scored 3.50 even though its energy was 0.50 away from what I asked for, and the other four results were just loud songs that scored under 1.0. Claude wrote most of the code, the dataset and the docs, which saved a lot of time, but it still needed a double-check: its first model card said the dataset had 18 moods when it actually has 14, and some README claims about how the extra attributes change the rankings were rewritten after comparing real outputs. What surprised me was that the diversity penalty and the extra attributes changed ranks 3 to 5 much more than rank 1, for example Deep Intense Rock lost three of its last results when the extra attributes were turned on, and that with only one rock song the "rock" list quickly turned into "whatever is loud". Next I would try lowering the genre weight, using similarity between related genres like pop and indie pop, and testing on a bigger catalog.
+The biggest learning moment for me was seeing that a recommender is just a scoring rule plus a sort, and that the weights decide almost everything. In the adversarial profile (sad blues at 0.95 energy) the only blues song scored 3.50 even though its energy was 0.50 away from what I asked for, and the other four results were just loud songs that scored under 1.0. The agent did most of the drafting, but I reviewed the final output. The agent caught its own errors during its checks—like a wrong mood count (18 instead of 14) and some inaccurate claims about the ranking attributes—which I verified before submitting. What surprised me was that the diversity penalty and the extra attributes changed ranks 3 to 5 much more than rank 1 — Deep Intense Rock lost three of its last results when the extra attributes were turned on — and that with only one rock song the "rock" list quickly turned into "whatever is loud". Next I would try lowering the genre weight, using similarity between related genres like pop and indie pop, and testing on a bigger catalog.

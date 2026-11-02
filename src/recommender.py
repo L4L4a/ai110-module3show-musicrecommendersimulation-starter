@@ -171,6 +171,7 @@ STRATEGIES: Dict[str, RankingStrategy] = {
 
 
 def get_strategy(name: str) -> RankingStrategy:
+    """Look up a ranking strategy by its CLI name, or raise ValueError."""
     try:
         return STRATEGIES[name]
     except KeyError:
@@ -187,6 +188,7 @@ class Recommender:
 
     @staticmethod
     def _prefs(user: UserProfile) -> Dict:
+        """Convert a UserProfile into the preference dict that score_song expects."""
         return {
             "genre": user.favorite_genre,
             "mood": user.favorite_mood,
@@ -194,6 +196,7 @@ class Recommender:
         }
 
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
+        """Return the k highest-scoring songs for this user."""
         prefs = self._prefs(user)
         ranked = sorted(
             self.songs,
@@ -203,6 +206,7 @@ class Recommender:
         return ranked[:k]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
+        """Return a comma-separated string of the scoring terms that fired for this song."""
         _, reasons = score_song(self._prefs(user), asdict(song))
         return ", ".join(reasons) if reasons else "no scoring terms matched"
 

@@ -76,6 +76,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     songs = load_songs("data/songs.csv")
+    print(f"Loaded songs: {len(songs)}")
 
     profiles = {n: p for n, p in PROFILES.items() if args.profile == "all" or args.profile.lower() in n.lower()}
     if not profiles:
