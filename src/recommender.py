@@ -1,5 +1,6 @@
-from typing import List, Dict, Tuple, Optional
-from dataclasses import dataclass
+import csv
+from dataclasses import asdict, dataclass
+from typing import Dict, List, Tuple
 
 @dataclass
 class Song:
@@ -37,13 +38,26 @@ class Recommender:
     def __init__(self, songs: List[Song]):
         self.songs = songs
 
+    @staticmethod
+    def _prefs(user: UserProfile) -> Dict:
+        return {
+            "genre": user.favorite_genre,
+            "mood": user.favorite_mood,
+            "energy": user.target_energy,
+        }
+
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
-        # TODO: Implement recommendation logic
-        return self.songs[:k]
+        prefs = self._prefs(user)
+        ranked = sorted(
+            self.songs,
+            key=lambda song: score_song(prefs, asdict(song))[0],
+            reverse=True,
+        )
+        return ranked[:k]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
-        # TODO: Implement explanation logic
-        return "Explanation placeholder"
+        _, reasons = score_song(self._prefs(user), asdict(song))
+        return ", ".join(reasons) if reasons else "no scoring terms matched"
 
 GENRE_WEIGHT = 2.0
 MOOD_WEIGHT = 1.0
@@ -71,3 +85,32 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
         reasons.append(f"energy similarity (+{energy_sim:.2f})")
 
     return score, reasons
+
+
+def load_songs(csv_path: str) -> List[Dict]:
+    """Loads songs from a CSV file, converting numeric columns to numbers."""
+    int_fields = {"id", "tempo_bpm"}
+    float_fields = {"energy", "valence", "danceability", "acousticness"}
+    songs: List[Dict] = []
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            for key in int_fields:
+                row[key] = int(row[key])
+            for key in float_fields:
+                row[key] = float(row[key])
+            songs.append(row)
+    return songs
+
+
+def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
+    """
+    Scores every song, sorts by score descending (ties keep catalog order),
+    and returns the top k as (song_dict, score, explanation).
+    """
+    scored = []
+    for song in songs:
+        score, reasons = score_song(user_prefs, song)
+        explanation = ", ".join(reasons) if reasons else "no scoring terms matched"
+        scored.append((song, score, explanation))
+    scored.sort(key=lambda item: item[1], reverse=True)
+    return scored[:k]
