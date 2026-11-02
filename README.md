@@ -55,7 +55,7 @@ A profile is a small dictionary, for example `{"genre": "pop", "mood": "happy", 
    The maximum possible score is 4.0. The function returns `(score, reasons)`, where `reasons` lists only the terms that fired.
 2. **Ranking rule** (whole catalog): `recommend_songs` scores every song, sorts by score descending (ties keep CSV order), and returns the top `k` (default 5) with a reason string.
 
-Genre is weighted twice as heavily as mood, so a genre match alone (2.0) outranks a mood match plus a perfect energy match (2.0 only if the genre also matches, otherwise at most 2.0 exactly). This is a deliberate choice that the experiments below probe.
+Genre is weighted twice as heavily as mood, and a genre match (+2.0) is worth more than a perfect energy score (at most +1.0). So a same-genre song can outrank an off-genre song that is a better match on mood and energy combined, which the experiments below probe.
 
 ---
 
