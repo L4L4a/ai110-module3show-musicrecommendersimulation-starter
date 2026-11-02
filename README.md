@@ -219,10 +219,18 @@ Read and complete `model_card.md`:
 
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+---
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
+## Personal Reflection
 
+**What I learned about how recommenders turn data into predictions:**
 
+TODO: write 1-2 paragraphs in your own words.
 
+**Where bias or unfairness could show up in a system like this:**
+
+TODO: write 1-2 paragraphs in your own words (hint: think about what you saw in the adversarial profile and the one-song genres).
+
+**Something that surprised me:**
+
+TODO

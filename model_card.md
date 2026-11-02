@@ -11,7 +11,7 @@ Given a user's declared taste (one favorite genre, one favorite mood, one target
 ## 3. Data Used
 
 - **Source**: `data/songs.csv`, hand-written for this classroom project (not real listening data).
-- **Size**: 20 songs, 16 distinct genres, 18 distinct moods.
+- **Size**: 20 songs, 16 distinct genres, 14 distinct moods.
 - **Attributes per song**: `id`, `title`, `artist`, `genre`, `mood`, `energy` (0-1), `tempo_bpm`, `valence`, `danceability`, `acousticness` (all 0-1).
 - **Used by the scorer**: `genre`, `mood`, `energy`. The rest are loaded but not scored in the baseline.
 - **Genre counts**: lofi 3, pop 3 (counting the two pop songs plus "Neon Ballroom"), and every other genre exactly 1 song (`indie pop` is a separate genre from `pop`).
@@ -28,7 +28,7 @@ Everything below comes from the four baseline runs in the README (High-Energy Po
 - **Weight dominance**: genre (+2.0) is worth twice a mood match and up to twice a perfect energy score. In the adversarial run the single blues song scored 3.50 even though its energy was 0.50 away from the target, while the next four songs, which actually matched the energy, scored below 1.0. A genre label overrides everything else.
 - **Energy is the only continuous term, so it acts as the tie-breaker**: whenever no genre or mood matches, the list is simply "songs closest in energy", which is why Gym Hero, Storm Runner, Pulse Garden and Iron Cathedral keep reappearing for different high-energy profiles.
 - **Exact-match categories**: `pop` and `indie pop`, or `chill` and `relaxed`, are treated as completely unrelated, although a listener would see them as close. Rooftop Lights (indie pop, happy) only gets the mood point for a pop/happy user.
-- **Artist repetition**: Neon Echo, LoRoom and similar artists can fill several slots, because nothing in the baseline penalizes repeats (e.g. both LoRoom songs are in the Chill Lofi top 3).
+- **Artist repetition**: The same artist can fill several slots, because nothing in the baseline penalizes repeats (e.g. two of the top 3 Chill Lofi results, Midnight Coding and Focus Flow, are both by LoRoom).
 - **Single static taste**: one genre, one mood, one energy per profile. No history, no multi-taste users, no negative signals like skips.
 
 ## 6. Evaluation Process
