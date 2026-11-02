@@ -100,14 +100,14 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Every recommendation prints the exact scoring terms that fired. Three examples taken from the runs below:
+Every recommendation prints the exact scoring terms that fired. Three examples taken from the High-Energy Pop run below (ranks 1, 2 and 4):
 
 ```text
-Sunrise City by Neon Echo - Score: 3.92
+1. Sunrise City by Neon Echo - Score: 3.92
    Because: genre match (+2.0), mood match (+1.0), energy similarity (+0.92)
-Gym Hero by Max Pulse - Score: 2.97
+2. Gym Hero by Max Pulse - Score: 2.97
    Because: genre match (+2.0), energy similarity (+0.97)
-Rooftop Lights by Indigo Parade - Score: 1.86
+4. Rooftop Lights by Indigo Parade - Score: 1.86
    Because: mood match (+1.0), energy similarity (+0.86)
 ```
 
@@ -291,14 +291,6 @@ Read and complete `model_card.md`:
 
 ## Personal Reflection
 
-**What I learned about how recommenders turn data into predictions:**
+*Draft written with Claude from what happened in this session; edit it until it sounds like you.*
 
-TODO: write 1-2 paragraphs in your own words.
-
-**Where bias or unfairness could show up in a system like this:**
-
-TODO: write 1-2 paragraphs in your own words (hint: think about what you saw in the adversarial profile and the one-song genres).
-
-**Something that surprised me:**
-
-TODO
+The biggest learning moment for me was seeing that a recommender is just a scoring rule plus a sort, and that the weights decide almost everything. In the adversarial profile (sad blues at 0.95 energy) the only blues song scored 3.50 even though its energy was 0.50 away from what I asked for, and the other four results were just loud songs that scored under 1.0. Claude wrote most of the code, the dataset and the docs, which saved a lot of time, but it still needed a double-check: its first model card said the dataset had 18 moods when it actually has 14, and some README claims about how the extra attributes change the rankings were rewritten after comparing real outputs. What surprised me was that the diversity penalty and the extra attributes changed ranks 3 to 5 much more than rank 1, for example Deep Intense Rock lost three of its last results when the extra attributes were turned on, and that with only one rock song the "rock" list quickly turned into "whatever is loud". Next I would try lowering the genre weight, using similarity between related genres like pop and indie pop, and testing on a bigger catalog.

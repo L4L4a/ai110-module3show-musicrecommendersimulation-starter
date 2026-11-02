@@ -76,9 +76,23 @@ The prompt asked for ranking modes that can be switched from `main.py`. The agen
 
 ---
 
+## Verification already run (by the AI agent, not by the student)
+
+I cannot know which checks you have run yourself, so I am not recording any as yours. These are the checks the agent ran, with results; the checklist below is yours to run and tick.
+
+- **CSV integrity**: 20 rows, 15 columns, 0 empty cells, 20 unique ids; `load_songs` converts every numeric column.
+- **Every new column is used in scoring** (change one profile key, confirm the score rises and a reason appears): `popularity`, `release_decade`, `mood_tag`, `instrumentalness`, `liveness` all fired (+0.50 each on a perfect match); `acousticness` and `danceability` also fire. All of these keys are used by at least one of the four profiles.
+- **Independent score recomputation** (arithmetic done separately from `score_song`, all matched to 4 decimals):
+  - Sunrise City, High-Energy Pop (baseline): 2.0 + 1.0 + (1 - |0.82 - 0.90|) = 2.0 + 1.0 + 0.92 = **3.92**
+  - Focus Flow, Chill Lofi (baseline): 2.0 + (1 - |0.40 - 0.35|) = 2.0 + 0.95 = **2.95**
+  - Porch Light Blues, Adversarial (baseline): 2.0 + 1.0 + (1 - |0.45 - 0.95|) = 2.0 + 1.0 + 0.50 = **3.50**
+  - Library Rain, Chill Lofi (extended): 2.0 + 1.0 + 1.00 + 0.5 (2020s) + 0.5 * (1 - 0/100) + 0.5 * (1 - |0.86 - 0.80|) + 0.5 * (1 - |0.70 - 0.60|) = 2.0 + 1.0 + 1.00 + 0.50 + 0.50 + 0.47 + 0.45 = **5.92** (its mood tag is "dreamy", not "cozy", so no tag bonus)
+- **Runs**: 4 profiles x 4 modes x diversity on/off = 32 combinations ran without error, and the default `python -m src.main`, `--plain` and `--basic` variants also ran. 5 pytest tests pass.
+- **README vs terminal**: every output block in README.md was compared line by line against a fresh run. One mismatch was found and fixed: the "three example explanations" block had dropped the rank numbers (and skipped from rank 2 to a rank 4 song without saying so). It now shows the real lines with ranks 1, 2 and 4.
+
 ## Manual verification
 
-Check these yourself before you submit:
+Check these yourself before you submit (unticked because the agent cannot run them for you):
 
 - [ ] Run `python -m src.main --basic --plain` and confirm the four outputs match the fenced blocks in README.md.
 - [ ] Open `data/songs.csv`: 20 rows, no blank cells, and the genres and moods look reasonable to you (the song titles, artists and numbers are invented).
