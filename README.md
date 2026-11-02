@@ -96,16 +96,94 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+Every recommendation prints the exact scoring terms that fired. Three examples taken from the runs below:
 
+```text
+Sunrise City by Neon Echo - Score: 3.92
+   Because: genre match (+2.0), mood match (+1.0), energy similarity (+0.92)
+Gym Hero by Max Pulse - Score: 2.97
+   Because: genre match (+2.0), energy similarity (+0.97)
+Rooftop Lights by Indigo Parade - Score: 1.86
+   Because: mood match (+1.0), energy similarity (+0.86)
 ```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
+
+### Baseline profile runs (genre +2.0, mood +1.0, energy similarity)
+
+Produced with `python -m src.main`. Each profile returns its top 5 of 20 songs.
+
+**High-Energy Pop**
+
+```text
+=== High-Energy Pop ===
+Profile: genre=pop, mood=happy, energy=0.9
+
+1. Sunrise City by Neon Echo - Score: 3.92
+   Because: genre match (+2.0), mood match (+1.0), energy similarity (+0.92)
+2. Gym Hero by Max Pulse - Score: 2.97
+   Because: genre match (+2.0), energy similarity (+0.97)
+3. Neon Ballroom by Velour - Score: 2.78
+   Because: genre match (+2.0), energy similarity (+0.78)
+4. Rooftop Lights by Indigo Parade - Score: 1.86
+   Because: mood match (+1.0), energy similarity (+0.86)
+5. Storm Runner by Voltline - Score: 0.99
+   Because: energy similarity (+0.99)
 ```
+
+**Chill Lofi**
+
+```text
+=== Chill Lofi ===
+Profile: genre=lofi, mood=chill, energy=0.35
+
+1. Library Rain by Paper Lanterns - Score: 4.00
+   Because: genre match (+2.0), mood match (+1.0), energy similarity (+1.00)
+2. Midnight Coding by LoRoom - Score: 3.93
+   Because: genre match (+2.0), mood match (+1.0), energy similarity (+0.93)
+3. Focus Flow by LoRoom - Score: 2.95
+   Because: genre match (+2.0), energy similarity (+0.95)
+4. Spacewalk Thoughts by Orbit Bloom - Score: 1.93
+   Because: mood match (+1.0), energy similarity (+0.93)
+5. Coffee Shop Stories by Slow Stereo - Score: 0.98
+   Because: energy similarity (+0.98)
+```
+
+**Deep Intense Rock**
+
+```text
+=== Deep Intense Rock ===
+Profile: genre=rock, mood=intense, energy=0.92
+
+1. Storm Runner by Voltline - Score: 3.99
+   Because: genre match (+2.0), mood match (+1.0), energy similarity (+0.99)
+2. Gym Hero by Max Pulse - Score: 1.99
+   Because: mood match (+1.0), energy similarity (+0.99)
+3. Pulse Garden by Kairo Wave - Score: 0.98
+   Because: energy similarity (+0.98)
+4. Iron Cathedral by Ashen Gate - Score: 0.95
+   Because: energy similarity (+0.95)
+5. Sunrise City by Neon Echo - Score: 0.90
+   Because: energy similarity (+0.90)
+```
+
+**Adversarial (sad blues at max energy)**
+
+```text
+=== Adversarial (sad blues at max energy) ===
+Profile: genre=blues, mood=sad, energy=0.95
+
+1. Porch Light Blues by Delta Mae - Score: 3.50
+   Because: genre match (+2.0), mood match (+1.0), energy similarity (+0.50)
+2. Pulse Garden by Kairo Wave - Score: 0.99
+   Because: energy similarity (+0.99)
+3. Gym Hero by Max Pulse - Score: 0.98
+   Because: energy similarity (+0.98)
+4. Iron Cathedral by Ashen Gate - Score: 0.98
+   Because: energy similarity (+0.98)
+5. Storm Runner by Voltline - Score: 0.96
+   Because: energy similarity (+0.96)
+```
+
+**How the profiles differ.** High-Energy Pop and Chill Lofi both get a full 3-term match at rank 1 (3.92 and 4.00), but Pop has only three pop songs, so its list drops to mood-only and energy-only matches by rank 4-5, while Lofi has three lofi songs and fills ranks 1-3 with genre matches. Deep Intense Rock has just one rock song; after it, rank 2 is a pop song (Gym Hero) that matches only on mood, and ranks 3-5 are pure energy matches from metal, EDM and pop, with scores bunched between 0.90 and 0.98. The adversarial blues/sad/0.95 profile shows the weight problem clearly: the only blues song scores 3.50 despite an energy gap of 0.50, and every other result is below 1.0, so the user gets one on-genre song and four loud songs that are nothing like a sad blues listener's taste.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
 
