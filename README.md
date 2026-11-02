@@ -17,17 +17,45 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+### How real recommenders work
 
-Some prompts to answer:
+Production systems such as Spotify and YouTube combine two broad signals:
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+- **Content-based signals**: attributes of the item itself. Spotify exposes audio features such as `energy`, `danceability`, `valence` (musical positivity), `acousticness`, and `tempo` (BPM), plus metadata like genre tags, artist, and release year. YouTube adds video-level features such as title/description text, category, and language.
+- **Collaborative signals**: user behavior. Plays, skips, saves, playlist adds, replays, watch time, and likes are logged per user. Users with similar histories are treated as neighbors (matrix factorization / embeddings), so a song can be recommended because similar listeners liked it, even if its audio features look nothing like your favorites.
 
-You can include a simple diagram or bullet list if helpful.
+A large-scale system runs in stages: (1) *candidate generation* narrows millions of items to a few hundred using embeddings, (2) a *ranking model* scores each candidate for the specific user (predicted probability of play, completion, or save), and (3) *re-ranking* applies business rules such as diversity, freshness, and de-duplication. Implicit feedback (a skip within 30 seconds is a strong negative) usually outweighs explicit ratings because there is far more of it.
+
+This project is a small **content-based** simulation. It has no user history and no collaborative filtering; it replaces the learned ranking model with a hand-written scoring rule so every recommendation is explainable.
+
+### (a) Input data: song attributes
+
+Each row of `data/songs.csv` is one song with:
+
+| Attribute | Type | Role in this system |
+|---|---|---|
+| `genre` | categorical (pop, lofi, rock, ...) | Scored: exact match |
+| `mood` | categorical (happy, chill, intense, ...) | Scored: exact match |
+| `energy` | float 0-1 | Scored: closeness to the user's target |
+| `tempo_bpm` | number | Loaded, not scored in the baseline |
+| `valence`, `danceability`, `acousticness` | float 0-1 | Loaded, not scored in the baseline |
+| `id`, `title`, `artist` | identifiers | Display only |
+
+### (b) User preferences: the taste profile
+
+A profile is a small dictionary, for example `{"genre": "pop", "mood": "happy", "energy": 0.8}`: one favorite genre, one favorite mood, and a target energy level. There is no listening history; the profile is declared directly and is a single static point in feature space.
+
+### (c) Ranking and selection: score, then sort
+
+1. **Scoring rule** (one song at a time): `score_song(user_prefs, song)` adds up
+   - genre match: **+2.0** if `song.genre == user.genre`
+   - mood match: **+1.0** if `song.mood == user.mood`
+   - energy similarity: **+(1 - |song.energy - target_energy|)**, which lies in 0 to 1 (1.0 is a perfect match)
+
+   The maximum possible score is 4.0. The function returns `(score, reasons)`, where `reasons` lists only the terms that fired.
+2. **Ranking rule** (whole catalog): `recommend_songs` scores every song, sorts by score descending (ties keep CSV order), and returns the top `k` (default 5) with a reason string.
+
+Genre is weighted twice as heavily as mood, so a genre match alone (2.0) outranks a mood match plus a perfect energy match (2.0 only if the genre also matches, otherwise at most 2.0 exactly). This is a deliberate choice that the experiments below probe.
 
 ---
 
