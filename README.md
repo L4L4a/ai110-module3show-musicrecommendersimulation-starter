@@ -118,7 +118,7 @@ Produced with `python -m src.main --basic --plain` (`--basic` ignores the stretc
 **High-Energy Pop**
 
 ```text
-=== High-Energy Pop ===
+=== High-Energy Pop | mode=balanced | diversity=off ===
 Profile: genre=pop, mood=happy, energy=0.9
 
 1. Sunrise City by Neon Echo - Score: 3.92
@@ -136,7 +136,7 @@ Profile: genre=pop, mood=happy, energy=0.9
 **Chill Lofi**
 
 ```text
-=== Chill Lofi ===
+=== Chill Lofi | mode=balanced | diversity=off ===
 Profile: genre=lofi, mood=chill, energy=0.35
 
 1. Library Rain by Paper Lanterns - Score: 4.00
@@ -154,7 +154,7 @@ Profile: genre=lofi, mood=chill, energy=0.35
 **Deep Intense Rock**
 
 ```text
-=== Deep Intense Rock ===
+=== Deep Intense Rock | mode=balanced | diversity=off ===
 Profile: genre=rock, mood=intense, energy=0.92
 
 1. Storm Runner by Voltline - Score: 3.99
@@ -172,7 +172,7 @@ Profile: genre=rock, mood=intense, energy=0.92
 **Adversarial (sad blues at max energy)**
 
 ```text
-=== Adversarial (sad blues at max energy) ===
+=== Adversarial (sad blues at max energy) | mode=balanced | diversity=off ===
 Profile: genre=blues, mood=sad, energy=0.95
 
 1. Porch Light Blues by Delta Mae - Score: 3.50
