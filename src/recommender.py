@@ -45,29 +45,29 @@ class Recommender:
         # TODO: Implement explanation logic
         return "Explanation placeholder"
 
-def load_songs(csv_path: str) -> List[Dict]:
-    """
-    Loads songs from a CSV file.
-    Required by src/main.py
-    """
-    # TODO: Implement CSV loading logic
-    print(f"Loading songs from {csv_path}...")
-    return []
+GENRE_WEIGHT = 2.0
+MOOD_WEIGHT = 1.0
+
 
 def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     """
     Scores a single song against user preferences.
-    Required by recommend_songs() and src/main.py
+    Returns (score, reasons); reasons lists only the scoring terms that fired.
     """
-    # TODO: Implement scoring logic using your Algorithm Recipe from Phase 2.
-    # Expected return format: (score, reasons)
-    return []
+    score = 0.0
+    reasons: List[str] = []
 
-def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
-    """
-    Functional implementation of the recommendation logic.
-    Required by src/main.py
-    """
-    # TODO: Implement scoring and ranking logic
-    # Expected return format: (song_dict, score, explanation)
-    return []
+    if song["genre"] == user_prefs.get("genre"):
+        score += GENRE_WEIGHT
+        reasons.append(f"genre match (+{GENRE_WEIGHT:.1f})")
+
+    if song["mood"] == user_prefs.get("mood"):
+        score += MOOD_WEIGHT
+        reasons.append(f"mood match (+{MOOD_WEIGHT:.1f})")
+
+    if "energy" in user_prefs:
+        energy_sim = 1 - abs(float(song["energy"]) - float(user_prefs["energy"]))
+        score += energy_sim
+        reasons.append(f"energy similarity (+{energy_sim:.2f})")
+
+    return score, reasons
